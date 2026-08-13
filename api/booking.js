@@ -3,7 +3,11 @@ function clean(value, max = 500) {
 }
 
 function escapeHtml(value) {
-  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return clean(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function formatVnd(value) {
+  return new Intl.NumberFormat('vi-VN').format(value) + 'đ';
 }
 
 export default async function handler(req, res) {
@@ -25,6 +29,7 @@ export default async function handler(req, res) {
     try { body = JSON.parse(body); } catch { return res.status(400).json({ ok: false, error: 'Invalid JSON' }); }
   }
 
+  const orderType = clean(body.orderType, 40) || 'booking';
   const name = clean(body.name, 120);
   const phone = clean(body.phone, 50);
   const car = clean(body.car, 120) || 'Chưa cung cấp';
@@ -44,16 +49,42 @@ export default async function handler(req, res) {
     timeZone: 'Asia/Ho_Chi_Minh',
   }).format(new Date());
 
-  const message = [
-    '<b>ĐẶT LỊCH MỚI – PHƯỚC LỘC</b>', '',
-    `<b>Thời gian:</b> ${escapeHtml(submittedAt)}`,
-    `<b>IP khách:</b> ${escapeHtml(clientIp)}`,
-    `<b>Họ tên:</b> ${escapeHtml(name)}`,
-    `<b>Số điện thoại:</b> ${escapeHtml(phone)}`,
-    `<b>Dòng xe:</b> ${escapeHtml(car)}`,
-    `<b>Dịch vụ:</b> ${escapeHtml(service)}`,
-    `<b>Ghi chú:</b> ${escapeHtml(note)}`,
-  ].join('\n');
+  let message;
+  if (orderType === 'product_order') {
+    const address = clean(body.address, 300);
+    const product = clean(body.product, 180);
+    const quantity = Math.max(1, Math.min(99, Number.parseInt(body.quantity, 10) || 1));
+    const unitPrice = Math.max(0, Math.min(100000000, Number.parseInt(body.unitPrice, 10) || 0));
+    if (!address || !product || !unitPrice) {
+      return res.status(400).json({ ok: false, error: 'Product, address and unit price are required' });
+    }
+    const total = quantity * unitPrice;
+    message = [
+      '<b>ĐƠN MUA NHỚT MỚI – PHƯỚC LỘC</b>', '',
+      `<b>Thời gian:</b> ${escapeHtml(submittedAt)}`,
+      `<b>IP khách:</b> ${escapeHtml(clientIp)}`,
+      `<b>Họ tên:</b> ${escapeHtml(name)}`,
+      `<b>Số điện thoại:</b> ${escapeHtml(phone)}`,
+      `<b>Địa chỉ nhận hàng:</b> ${escapeHtml(address)}`,
+      `<b>Sản phẩm:</b> ${escapeHtml(product)}`,
+      `<b>Đơn giá:</b> ${escapeHtml(formatVnd(unitPrice))}`,
+      `<b>Số lượng:</b> ${quantity}`,
+      `<b>Tiền hàng:</b> ${escapeHtml(formatVnd(total))}`,
+      '<b>Phí vận chuyển:</b> Báo riêng sau khi nhận đơn',
+      `<b>Ghi chú:</b> ${escapeHtml(note)}`,
+    ].join('\n');
+  } else {
+    message = [
+      '<b>ĐẶT LỊCH MỚI – PHƯỚC LỘC</b>', '',
+      `<b>Thời gian:</b> ${escapeHtml(submittedAt)}`,
+      `<b>IP khách:</b> ${escapeHtml(clientIp)}`,
+      `<b>Họ tên:</b> ${escapeHtml(name)}`,
+      `<b>Số điện thoại:</b> ${escapeHtml(phone)}`,
+      `<b>Dòng xe:</b> ${escapeHtml(car)}`,
+      `<b>Dịch vụ:</b> ${escapeHtml(service)}`,
+      `<b>Ghi chú:</b> ${escapeHtml(note)}`,
+    ].join('\n');
+  }
 
   const telegramResponse = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
