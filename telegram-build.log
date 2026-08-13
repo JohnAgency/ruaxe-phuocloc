@@ -1,0 +1,21 @@
+[WARN] The "pnpm" field in package.json is no longer read by pnpm. The following keys were ignored: "pnpm.patchedDependencies", "pnpm.overrides". See https://pnpm.io/settings for the new home of each setting.
+
+> ruaxe-phuocloc@1.0.0 build /home/ubuntu/work_ruaxe
+> vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+
+vite v7.1.9 building for production...
+(!) %VITE_ANALYTICS_ENDPOINT% is not defined in env variables found in /index.html. Is the variable mistyped?
+(!) %VITE_ANALYTICS_WEBSITE_ID% is not defined in env variables found in /index.html. Is the variable mistyped?
+<script src="%VITE_ANALYTICS_ENDPOINT%/umami"> in "/index.html" can't be bundled without type="module" attribute
+transforming...
+✓ 1617 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                 368.19 kB │ gzip: 105.85 kB
+../dist/public/assets/index-D_wi6PP-.css  108.79 kB │ gzip:  18.08 kB
+../dist/public/assets/index-tLc8sEbv.js   343.87 kB │ gzip: 105.50 kB
+✓ built in 3.28s
+
+  dist/index.js  788b 
+
+⚡ Done in 3ms
