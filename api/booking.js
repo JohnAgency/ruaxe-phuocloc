@@ -70,7 +70,7 @@ export default async function handler(req, res) {
       `<b>Đơn giá:</b> ${escapeHtml(formatVnd(unitPrice))}`,
       `<b>Số lượng:</b> ${quantity}`,
       `<b>Tiền hàng:</b> ${escapeHtml(formatVnd(total))}`,
-      '<b>Phí vận chuyển:</b> Báo riêng sau khi nhận đơn',
+      '<b>Phí vận chuyển:</b> Báo riêng sau khi xác nhận đơn',
       `<b>Ghi chú:</b> ${escapeHtml(note)}`,
     ].join('\n');
   } else {
