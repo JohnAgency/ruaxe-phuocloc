@@ -32,8 +32,22 @@ export default async function handler(req, res) {
   const note = clean(body.note, 500) || 'Không có';
   if (!name || !phone) return res.status(400).json({ ok: false, error: 'Name and phone are required' });
 
+  const forwardedFor = req.headers['x-forwarded-for'];
+  const rawIp = Array.isArray(forwardedFor)
+    ? forwardedFor[0]
+    : String(forwardedFor || req.headers['x-real-ip'] || '').split(',')[0].trim();
+  const clientIp = clean(rawIp, 100) || 'Không xác định';
+
+  const submittedAt = new Intl.DateTimeFormat('vi-VN', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+    timeZone: 'Asia/Ho_Chi_Minh',
+  }).format(new Date());
+
   const message = [
     '<b>ĐẶT LỊCH MỚI – PHƯỚC LỘC</b>', '',
+    `<b>Thời gian:</b> ${escapeHtml(submittedAt)}`,
+    `<b>IP khách:</b> ${escapeHtml(clientIp)}`,
     `<b>Họ tên:</b> ${escapeHtml(name)}`,
     `<b>Số điện thoại:</b> ${escapeHtml(phone)}`,
     `<b>Dòng xe:</b> ${escapeHtml(car)}`,
